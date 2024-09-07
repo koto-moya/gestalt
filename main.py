@@ -19,7 +19,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.get("/")
-@limiter.limit("1/hour")
+@limiter.limit("10/minute")
 async def up_check(request: Request):
     return {"system health":"healthy!"}
 

@@ -1,1 +1,1 @@
-curl -X 'GET' 'http://127.0.0.1:8000/' >> /Users/koto/build/PARM/system/cron_logs/system_health.log 2>&1
+curl -s -X 'GET' 'http://127.0.0.1:8000/' >> /Users/koto/build/PARM/system/cron_logs/system_health.log 2>&1

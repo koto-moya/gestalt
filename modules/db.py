@@ -3,6 +3,8 @@ from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
 import smtplib
 import json
+import time
+from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
@@ -81,7 +83,8 @@ def reset_password_m(payload):
 def store_reset_token(email):
     with get_db_conn() as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("UPDATE api_users SET reset_token = %s WHERE email = %s;", (utils.generate_reset_token(), email,))
+            reset_timer = datetime.now(datetime.UTC)
+            cursor.execute("UPDATE api_users SET reset_token = %s, reset_timer = %s WHERE email = %s;", (utils.generate_reset_token(),reset_timer, email,))
             db_conn.commit()
 
 def remove_reset_token(email):
