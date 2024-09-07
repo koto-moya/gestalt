@@ -18,6 +18,11 @@ app = FastAPI(docs_url=None, redoc_url="/docs", openapi_url="/api/openapi.json")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+@app.get("/")
+@limiter.limit("1/hour")
+async def up_check(request: Request):
+    return {"system health":"healthy!"}
+
 @app.get("/token/")
 @limiter.limit("1/minute")
 async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
@@ -36,7 +41,7 @@ async def data_to_db(request: Request, payload: DataPayload, current_user: User 
     return {"status": "success"}
 
 @app.get("/resetpasswordtoken/", include_in_schema=False)
-@limiter.limit("1/minute")
+@limiter.limit("1/hour")
 async def get_reset_token(request: Request, reset_token_payload: ResetTokenPayload) -> dict:
     email = get_email(reset_token_payload.email)
     if email:
