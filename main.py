@@ -1,15 +1,26 @@
-from fastapi import HTTPException, Depends, status, FastAPI
+from fastapi import HTTPException, Depends, status, FastAPI, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from psycopg2.extras import RealDictCursor 
-import json
 from datetime import timedelta
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 from modules.utils import *
 from modules.types import *
+from modules.db import *
+
+# Limiter for endpoints
+
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(docs_url=None, redoc_url="/docs", openapi_url="/api/openapi.json")
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 @app.get("/token/")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
+@limiter.limit("1/minute")
+async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers ={"WWW-Authenticate": "Bearer"})
@@ -18,53 +29,43 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return Token(access_token=access_token, token_type="bearer")
 
 @app.post("/uploadCodes/", summary="Code upload")
-async def data_to_db(payload: DataPayload, current_user: User =  Depends(get_current_user)):
+@limiter.limit("1/minute")
+async def data_to_db(request: Request, payload: DataPayload, current_user: User =  Depends(get_current_user)) -> dict:
     brand_id = get_or_create_brand(payload.brand)
-    with get_db_conn() as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("INSERT INTO codes_data_lake (brand_id, json_data, source) VALUES (%s, %s, %s);", (brand_id, json.dumps(payload.data), payload.source))
-            db_conn.commit()
+    insert_data(brand_id, payload)
     return {"status": "success"}
 
-
-# Need to create a reset password method.  Need to store the user email so we can send the reset token to them.  
 @app.get("/resetpasswordtoken/", include_in_schema=False)
-async def get_reset_token(reset_token_payload: ResetTokenPayload):
-    with get_db_conn() as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT email FROM api_users WHERE email = %s;", (reset_token_payload.email, ))
-            account = cursor.fetchone()
-    if account:
-        store_reset_token(account["email"])
-        send_token(account["email"])
+@limiter.limit("1/minute")
+async def get_reset_token(request: Request, reset_token_payload: ResetTokenPayload) -> dict:
+    email = get_email(reset_token_payload.email)
+    if email:
+        store_reset_token(email)
+        send_token(email)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No user found with this email")
+    return {"status":"success"}
 
 @app.post("/resetpasssword/", include_in_schema=False)
-async def reset_password(reset_password_payload: ResetPasswordPayload):
-    with get_db_conn() as db_conn:
-        with db_conn.cursor() as cursor:
-            cursor.execute("SELECT email FROM api_users WHERE reset_token = %s AND email = %s;", (reset_password_payload.token, reset_password_payload.email,))
-            check = cursor.fetchone()
-            if not check:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email or token not recognized")
-            else:
-                cursor.execute("UPDATE api_users SET hashed_password = %s WHERE reset_token = %s AND email = %s;", (get_password_hash(reset_password_payload.new_password),reset_password_payload.token, reset_password_payload.email,))
-                db_conn.commit()
+@limiter.limit("1/minute")
+async def reset_password(request: Request, reset_password_payload: ResetPasswordPayload) -> dict:
+    check = reset_authentication_verification(reset_password_payload)   
+    if not check:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email or token not recognized")
+    else:
+        reset_password_m(reset_password_payload)
     remove_reset_token(reset_password_payload.email)
+    return {"status":"success"}
 
 @app.post("/changepassword/", include_in_schema=False)
-async def change_password(new_password_payload: NewPasswordPayload, current_user: User =  Depends(get_current_user)):
-    with get_db_conn() as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            if current_user.username != new_password_payload.username:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to change this user's password")
-            cursor.execute('SELECT * FROM api_users WHERE username = %s;', (new_password_payload.username,))
-            user = cursor.fetchone()
-            if not user:
-                raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username", headers ={"WWW-Authenticate": "Bearer"})
-            if verify_password(new_password_payload.new_password, user["hashed_password"]) or not verify_password(new_password_payload.old_password, user["hashed_password"]):
-                raise HTTPException(status_code = status.HTTP_406_NOT_ACCEPTABLE, detail="New password matches old or old password does not match")
-            cursor.execute("UPDATE api_users SET hashed_password = %s WHERE username = %s;", (get_password_hash(new_password_payload.new_password), new_password_payload.username))
-            db_conn.commit()
+@limiter.limit("1/minute")
+async def change_password(request: Request, new_password_payload: NewPasswordPayload, current_user: User =  Depends(get_current_user)) -> dict:
+    if current_user.username != new_password_payload.username:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to change this user's password")
+    user = get_user(new_password_payload.username)
+    if not user:
+        raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username", headers ={"WWW-Authenticate": "Bearer"})
+    if verify_password(new_password_payload.new_password, user["hashed_password"]) or not verify_password(new_password_payload.old_password, user["hashed_password"]):
+        raise HTTPException(status_code = status.HTTP_406_NOT_ACCEPTABLE, detail="New password matches old or old password does not match")
+    change_password_m(new_password_payload)
     return {"status": "Success"}
