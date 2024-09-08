@@ -1,5 +1,5 @@
 <div align="center">
-<img src="misc/logo.png" width="128" height="128">
+<img src="misc/logo.png" width="256" height="256">
 </div>
 
 # PARM: Podcast Advertising Relationship Management System
