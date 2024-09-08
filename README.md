@@ -1,4 +1,4 @@
-![](misc/logo.png){width=64 height=64}
+![](misc/logo.png =64x64)
 # PARM: Podcast Advertising Relationship Management System
 
 A simple (one could hope) fastAPI based CRM for [Podscale](https://podscalemedia.com/).
