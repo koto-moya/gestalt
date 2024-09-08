@@ -1,4 +1,6 @@
-<img src="misc/logo.png" width="64" height="64">
+<div align="center">
+<img src="misc/logo.png" width="128" height="128">
+</div>
 
 # PARM: Podcast Advertising Relationship Management System
 
