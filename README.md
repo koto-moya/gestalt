@@ -1,8 +1,9 @@
+# PARM 
 <div align="center">
-<img src="misc/logo.png" width="256" height="256">
+<img src="misc/logo.png" width="128" height="128">
 </div>
 
-# PARM: Podcast Advertising Relationship Management System
+### Podcast Advertising Relationship Management System
 
 A simple (one could hope) fastAPI based CRM for [Podscale](https://podscalemedia.com/).
 
