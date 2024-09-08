@@ -1,0 +1,2 @@
+*/10 * * * * /Users/koto/build/PARM/system/clear_reset_tokens.sh
+0 * * * * /Users/koto/build/PARM/system/system_health.sh

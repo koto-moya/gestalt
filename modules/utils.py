@@ -1,34 +1,17 @@
 from fastapi import HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 import jwt
 from jwt.exceptions import InvalidTokenError
-import os
 from datetime import datetime, timezone, timedelta
-from . import types
-import secrets
-import string
-import random
-from . import db
 
+from .types import TokenData
+from .db import get_user
+from config import SECRET_KEY, ALGORITHM, oauth2_scheme
+from .auth_helpers import verify_password
 
-SECRET_KEY = os.getenv("CRYPTKEY") # generate using openssl rand -hex 32
-ALGORITHM = "HS256" # uses SHA-256 has function (like SSH!)
-TOKEN_EXPIRY = 30 # 30 mins for now
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# OAuth methods
-def verify_password(plain_password, hashed_password) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
 
 # Core method for authenticating the user
 def authenticate_user(username: str, password: str):
-    user = db.get_user(username)
+    user = get_user(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -52,15 +35,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = types.TokenData(username=username)
+        token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
-    user = db.get_user(username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
-
-def generate_reset_token():
-    characters = string.ascii_letters + string.digits  + string.punctuation
-    token = ''.join(secrets.choice(characters) for _ in range(random.randint(16,32)))
-    return token
