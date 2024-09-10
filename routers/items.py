@@ -9,7 +9,7 @@ from config import limiter
 
 router = APIRouter(prefix="/upload")
 
-@router.post("/codes", summary="Code upload")
+@router.post("/data", summary="data upload")
 @limiter.limit("1/minute")
 async def data_to_db(request: Request, payload: DataPayload, current_user: User =  Depends(get_current_user)) -> dict:
     brand_id = get_or_create_brand(payload.brand)

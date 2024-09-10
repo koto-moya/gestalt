@@ -5,7 +5,7 @@
 
 ### Podcast Advertising Relationship Management System
 
-A simple (one could hope) fastAPI based CRM for [Podscale](https://podscalemedia.com/).
+A simple (one could hope) FastAPI based CRM for [Podscale](https://podscalemedia.com/).
 
 ## Features
 
