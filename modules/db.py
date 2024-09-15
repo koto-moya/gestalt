@@ -1,5 +1,4 @@
 from psycopg2.extras import RealDictCursor 
-from contextlib import contextmanager
 import smtplib
 import json
 from datetime import datetime, timezone, timedelta
@@ -8,15 +7,9 @@ from email.mime.multipart import MIMEMultipart
 import os
 from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token
-from config import db_pool
+from config import get_db_conn
 
-@contextmanager
-def get_db_conn():
-    conn = db_pool.getconn()
-    try:
-        yield conn
-    finally:
-        db_pool.putconn(conn)
+
 
 def add_user(username, password):
     with get_db_conn() as db_conn:
@@ -101,7 +94,7 @@ def send_token(receiver: str):
     msg['From'] = sender
     msg['To'] = receiver
     msg['subject'] = "Podscale Password Reset Token"
-    body = f"Password Reset Token\n\n{token["reset_token"]}\n\nDO NOT SHARE THIS WITH ANYONE."
+    body = f'Password Reset Token\n\n{token["reset_token"]}\n\nDO NOT SHARE THIS WITH ANYONE.'
     msg.attach(MIMEText(body, 'plain'))
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
