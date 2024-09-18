@@ -22,13 +22,6 @@ class NewPasswordPayload(BaseModel):
     email: str
     old_password: str
     new_password: str
-
-class ResetTokenPayload(BaseModel):
-    email: str
-
-class ResetPasswordPayload(BaseModel):
-    email: str
-    token: str
     
 # This type is for the actual data being sent
 class DataPayload(BaseModel):

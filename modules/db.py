@@ -1,12 +1,8 @@
 from psycopg2.extras import RealDictCursor 
-import smtplib
 import json
 from datetime import datetime, timezone, timedelta
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import os
 from .types import UserInDB
-from .auth_helpers import get_password_hash, generate_reset_token
+from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
 from config import get_db_conn
 
 
@@ -51,10 +47,10 @@ def get_email(email):
             account = cursor.fetchone()
     return account["email"]
 
-def reset_authentication_verification(payload):
+def reset_authentication_verification(email, token):
     with get_db_conn() as db_conn:
         with db_conn.cursor() as cursor:
-            cursor.execute("SELECT email FROM api_users WHERE reset_token = %s AND email = %s;", (payload.token, payload.email,))
+            cursor.execute("SELECT email FROM api_users WHERE email = %s AND reset_token = %s;", (email, token,))
             check = cursor.fetchone()
     return check
 
@@ -64,10 +60,10 @@ def change_password_m(payload):
             cursor.execute("UPDATE api_users SET hashed_password = %s WHERE username = %s;", (get_password_hash(payload.new_password), payload.username))
             db_conn.commit()
 
-def reset_password_m(payload):
+def reset_password_m(email, token, new_password):
     with get_db_conn() as db_conn:
         with db_conn.cursor() as cursor:
-            cursor.execute("UPDATE api_users SET hashed_password = %s WHERE reset_token = %s AND email = %s;", (get_password_hash(payload.new_password),payload.token, payload.email,))
+            cursor.execute("UPDATE api_users SET hashed_password = %s WHERE reset_token = %s AND email = %s;", (get_password_hash(new_password),token, email,))
             db_conn.commit()
 
 def store_reset_token(email):
@@ -80,28 +76,12 @@ def store_reset_token(email):
 def remove_reset_token(email):
     with get_db_conn() as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("UPDATE api_users SET reset_token = NULL WHERE email = %s;", (email,))
+            cursor.execute("UPDATE api_users SET reset_token = NULL, reset_timer = NULL WHERE email = %s;", (email,))
             db_conn.commit()
 
-def send_token(receiver: str):
+def send_token(email: str):
     with get_db_conn() as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT reset_token FROM api_users WHERE email = %s;", (receiver,))
+            cursor.execute("SELECT reset_token FROM api_users WHERE email = %s;", (email,))
             token = cursor.fetchone()
-    sender = os.getenv("REPORTING_EMAIL")
-    password = os.getenv("REPORTING_EMAIL_PASSWORD")
-    msg = MIMEMultipart()
-    msg['From'] = sender
-    msg['To'] = receiver
-    msg['subject'] = "Podscale Password Reset Token"
-    body = f'Password Reset Token\n\n{token["reset_token"]}\n\nDO NOT SHARE THIS WITH ANYONE.'
-    msg.attach(MIMEText(body, 'plain'))
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(sender, password)
-        server.sendmail(sender, receiver, msg.as_string())
-    except Exception as e:
-        return f"failed to send email: {e}"
-    finally:
-        server.quit()
+    send_email_with_token(email, token["reset_token"])
