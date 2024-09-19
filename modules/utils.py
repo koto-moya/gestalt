@@ -31,15 +31,11 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 async def get_current_user(request: Request): #token: str = Depends(oauth2_scheme))
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
     try:
-
         token = request.cookies.get("access_token")
         if not token:
             raise credentials_exception
-        
-        # If the token is prefixed with "Bearer", remove it
         if token.startswith("Bearer "):
             token = token[len("Bearer "):]
-
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
@@ -50,5 +46,4 @@ async def get_current_user(request: Request): #token: str = Depends(oauth2_schem
     user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
-    print(user)
     return user

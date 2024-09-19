@@ -12,6 +12,7 @@ class User(BaseModel):
     id: int
     username: str
     created_at: datetime
+    brand: str
 
 class UserInDB(User):
     hashed_password: str
