@@ -1,4 +1,4 @@
-from fastapi import Depends, Request
+from fastapi import Depends, Request, UploadFile, File, Form
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -21,10 +21,11 @@ def home_page(request: Request):
 def home_page(request: Request):
     return templates.TemplateResponse("upload_codes_data.html", {"request":request})
 
-
 @router.post("/data", summary="data upload")
 @limiter.limit("1/minute")
-async def data_to_db(request: Request, payload: DataPayload, current_user: User =  Depends(get_current_user)) -> dict:
-    brand_id = get_or_create_brand(payload.brand)
-    insert_data(brand_id, payload)
+async def data_to_db(request: Request, file: UploadFile = File(...), source: str = Form(...), current_user: User =  Depends(get_current_user)) -> dict:
+    content = await file.read()
+    print(content)
+    #brand_id = get_or_create_brand(current_user.brand)
+    #insert_data(brand_id, payload)
     return {"status": "success"}

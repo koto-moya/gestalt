@@ -23,7 +23,7 @@ def login_page(request: Request):
     return templates.TemplateResponse("get_reset_token.html", {"request": request})
 
 @router.post("/token", include_in_schema=False)
-@limiter.limit("1/minute")
+@limiter.limit("100/minute")
 async def login_for_access_token(request: Request, username: str = Form(...), password: str = Form(...)) -> Token:
     user = authenticate_user(username, password) # datatype: UserInDB
     if not user:
@@ -31,7 +31,7 @@ async def login_for_access_token(request: Request, username: str = Form(...), pa
     access_token_expires = timedelta(minutes=TOKEN_EXPIRY)
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     response = RedirectResponse(url="/upload", status_code=status.HTTP_303_SEE_OTHER)
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=TOKEN_EXPIRY*60)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=TOKEN_EXPIRY)
     return response
 
 @router.post("/resetpasswordtoken", include_in_schema=False, response_class=HTMLResponse)
