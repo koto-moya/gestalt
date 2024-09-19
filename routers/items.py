@@ -1,5 +1,8 @@
 from fastapi import Depends, Request
 from fastapi import APIRouter
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 
 
 from modules.types import DataPayload, User
@@ -8,6 +11,16 @@ from modules.utils import get_current_user
 from config import limiter
 
 router = APIRouter(prefix="/upload")
+templates = Jinja2Templates(directory="templates")
+
+@router.get("/", include_in_schema=False)
+def home_page(request: Request):
+    return templates.TemplateResponse("home_page.html", {"request":request})
+
+@router.get("/data_upload", include_in_schema=False)
+def home_page(request: Request):
+    return templates.TemplateResponse("upload_codes_data.html", {"request":request})
+
 
 @router.post("/data", summary="data upload")
 @limiter.limit("1/minute")

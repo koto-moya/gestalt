@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>upload codes data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <form action="upload/data" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <select name="source" id="source">
+            <option value="" disabled selected></option>
+            <option value="codes">shopify codes</option>
+            <option value="podscribe">podscribe</option>
+            <option value="survey">survey</option>
+        </select>
+        <button type="submit">upload</button>
+    </form>
+    </div>
+</body>
+</html>

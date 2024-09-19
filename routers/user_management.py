@@ -1,9 +1,9 @@
 from fastapi import HTTPException, Depends, status, Request, Form
-from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
 
 
 from modules.utils import authenticate_user, create_access_token, get_user, get_current_user, verify_password
@@ -14,21 +14,27 @@ from config import limiter, TOKEN_EXPIRY
 router  = APIRouter(prefix= "/account")
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/", response_class=HTMLResponse)
-def test(request: Request)-> dict:
+@router.get("/", response_class=HTMLResponse, include_in_schema=False)
+def login(request: Request)-> dict:
+    return templates.TemplateResponse("login_page.html", {"request": request})
+
+@router.get("/resetpasswordpage", response_class=HTMLResponse, include_in_schema=False,)
+def login_page(request: Request):
     return templates.TemplateResponse("get_reset_token.html", {"request": request})
 
-@router.get("/token")
+@router.post("/token", include_in_schema=False)
 @limiter.limit("1/minute")
-async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
-    user = authenticate_user(form_data.username, form_data.password)
+async def login_for_access_token(request: Request, username: str = Form(...), password: str = Form(...)) -> Token:
+    user = authenticate_user(username, password) # datatype: UserInDB
     if not user:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers ={"WWW-Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=TOKEN_EXPIRY)
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
-    return Token(access_token=access_token, token_type="bearer")
+    response = RedirectResponse(url="/upload", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=TOKEN_EXPIRY*60)
+    return response
 
-@router.post("/resetpasswordtoken", include_in_schema=False)
+@router.post("/resetpasswordtoken", include_in_schema=False, response_class=HTMLResponse)
 @limiter.limit("100/minute")
 async def get_reset_token(request: Request,email: str = Form(...)) -> dict:
     email = get_email(email)
@@ -39,7 +45,7 @@ async def get_reset_token(request: Request,email: str = Form(...)) -> dict:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No user found with this email")
     return templates.TemplateResponse("reset_password.html", {"request": request})
 
-@router.post("/resetpassword", include_in_schema=False)
+@router.post("/resetpassword", include_in_schema=False, response_class=HTMLResponse)
 @limiter.limit("1/minute")
 async def reset_password(request: Request, email: str = Form(...), token: str = Form(...), new_password: str = Form(...)) -> dict:
     check = reset_authentication_verification(email, token)   
@@ -48,7 +54,7 @@ async def reset_password(request: Request, email: str = Form(...), token: str = 
     else:
         reset_password_m(email, token, new_password)
     remove_reset_token(email)
-    return {"status":"success"}
+    return templates.TemplateResponse("reset_successful.html", {"request": request})
 
 @router.post("/changepassword", include_in_schema=False)
 @limiter.limit("1/minute")

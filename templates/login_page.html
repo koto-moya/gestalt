@@ -1,0 +1,42 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>login page</title>
+    <style>
+        /* Optional: Add some basic styling */
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+
+        .button:hover {background-color: #3e8e41}
+
+        .button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+<body>
+    <h1>login page</h1>
+    <form method="post" action="/account/token">
+        <input type="text" id="username" name="username" placeholder="username">
+        <input type="text" id="password" name="password" placeholder="password">
+        <input class="submit" type="submit" value="Submit">
+    </form>    
+    <button class="button" onclick="location.href='/account/resetpasswordpage'">reset password</button>
+</body>
+</html>
