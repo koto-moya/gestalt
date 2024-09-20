@@ -2,36 +2,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Main Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+    <title>Parm - Minimal Landing Page</title>
     <style>
-        /* Optional: Add some basic styling */
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 10px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            outline: none;
-            color: #fff;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 9px #999;
+        /* Base Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2d2b2b;
+            color: #FBECEDFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
 
-        .button:hover {background-color: #3e8e41}
+        /* Container styling */
+        .container {
+            text-align: center;
+        }
 
-        .button:active {
-            background-color: #3e8e41;
-            box-shadow: 0 5px #666;
-            transform: translateY(4px);
+        h1 {
+            font-family: 'Silkscreen', sans-serif;
+            font-size: 64px;
+            letter-spacing: 8px;
+            margin-bottom: 50px;
+            color: #A82223FF;
+        }
+
+        /* Button styling */
+        .login-btn {
+            padding: 15px 40px;
+            background-color: #A82223FF;
+            color: #FBECEDFF;
+            border: none;
+            border-radius: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: #DD5859FF;
         }
     </style>
 </head>
 <body>
-    <h1>landing page</h1>
-    <button class="button" onclick="location.href='/account'">login page</button>
+    <div class="container">
+    <h1>parm</h1>
+    <button class="login-btn" onclick="location.href='/account'">login</button>
+    </div>
 </body>
 </html>

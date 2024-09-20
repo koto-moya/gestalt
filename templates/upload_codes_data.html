@@ -1,29 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>upload codes data</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+    <title>Upload Codes Data</title>
     <style>
+        /* Base Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
+            background-color: #2d2b2b;
+            color: #FBECEDFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
+
+        /* Container styling */
         .container {
-            width: 50%;
-            margin: auto;
-            padding: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
         }
+
+        h2 {
+            font-family: 'Silkscreen', sans-serif;
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #A82223FF;
+        }
+
+        /* Form styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* File input: Keep default appearance */
+        input[type="file"] {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #FBECEDFF;
+            border: none;
+            background-color: transparent;
+            outline: none;
+            cursor: pointer;
+        }
+
+        select {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #FBECEDFF;
+            border-radius: 30px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            outline: none;
+            border: 2px solid transparent;
+        }
+
+        button {
+            padding: 15px 40px;
+            background-color: #A82223FF;
+            color: #FBECEDFF;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #DD5859FF;
+        }
+
     </style>
 </head>
 <body>
-    <form action="./data" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required>
-        <select name="source" id="source">
-            <option value="" disabled selected></option>
-            <option value="codes">shopify codes</option>
-            <option value="podscribe">podscribe</option>
-            <option value="survey">survey</option>
-        </select>
-        <button type="submit">upload</button>
-    </form>
+    <div class="container">
+        <h2>upload data</h2>
+        <form action="./data" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required>
+            <select name="source" id="source" required>
+                <option value="" disabled selected>Select source</option>
+                <option value="codes">Shopify Codes</option>
+                <option value="podscribe">Podscribe</option>
+                <option value="survey">Survey</option>
+            </select>
+            <button type="submit">Upload</button>
+        </form>
     </div>
 </body>
 </html>
