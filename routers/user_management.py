@@ -27,11 +27,12 @@ def login_page(request: Request):
 async def login_for_access_token(request: Request, username: str = Form(...), password: str = Form(...)) -> Token:
     user = authenticate_user(username, password) # datatype: UserInDB
     if not user:
-        raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers ={"WWW-Authenticate": "Bearer"})
+        #raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers ={"WWW-Authenticate": "Bearer"})
+        return templates.TemplateResponse("login_page_incorrect_username_or_password.html", {"request":request})
     access_token_expires = timedelta(minutes=TOKEN_EXPIRY)
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     response = RedirectResponse(url="/upload", status_code=status.HTTP_303_SEE_OTHER)
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=TOKEN_EXPIRY)
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=TOKEN_EXPIRY*100) # 50 min token expiry 
     return response
 
 @router.post("/resetpasswordtoken", include_in_schema=False, response_class=HTMLResponse)

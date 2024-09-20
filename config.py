@@ -20,7 +20,7 @@ def get_db_conn():
 
 SECRET_KEY = os.getenv("CRYPTKEY") # generate using openssl rand -hex 32
 ALGORITHM = "HS256" # uses SHA-256 has function (like SSH!)
-TOKEN_EXPIRY = 30 # 30 mins for now
+TOKEN_EXPIRY = 30 # Cookie creation sees this as seconds so multiply max_age by like 100?
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

@@ -11,7 +11,6 @@ A simple (one could hope) FastAPI based CRM for [Podscale](https://podscalemedia
 
 - OAuth2
 - Data ingestion endpoints
-- Extensible
 - No Javascript
 
 ## Future updates

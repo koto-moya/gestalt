@@ -23,7 +23,7 @@ def home_page(request: Request):
     return templates.TemplateResponse("upload_codes_data.html", {"request":request})
 
 @router.post("/data", summary="data upload")
-@limiter.limit("1/minute")
+@limiter.limit("100/minute")
 async def data_to_db(request: Request, file: UploadFile = File(...), source: str = Form(...), current_user: User =  Depends(get_current_user)) -> dict:
     content = await file.read()
     csv_file = io.StringIO(content.decode('utf-8'))
@@ -31,4 +31,4 @@ async def data_to_db(request: Request, file: UploadFile = File(...), source: str
     data = [r for r in data]
     brand_id = get_brand_id(current_user.brand)
     insert_data(brand_id, source, data)
-    return {"status": "success"}
+    return templates.TemplateResponse("upload_codes_data_success.html", {'request':request})
