@@ -32,7 +32,11 @@ async def login_for_access_token(request: Request, username: str = Form(...), pa
     access_token_expires = timedelta(minutes=TOKEN_EXPIRY)
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     response = RedirectResponse(url="/upload", status_code=status.HTTP_303_SEE_OTHER)
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True, max_age=TOKEN_EXPIRY*100) # 50 min token expiry 
+    response.set_cookie(key="access_token", 
+                        value=f"Bearer {access_token}",
+                        httponly=True, 
+                        #secure=True, enable in production https 
+                        max_age=TOKEN_EXPIRY) # 50 min token expiry 
     return response
 
 @router.post("/resetpasswordtoken", include_in_schema=False, response_class=HTMLResponse)
@@ -64,8 +68,11 @@ async def change_password(request: Request, new_password_payload: NewPasswordPay
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to change this user's password")
     user = get_user(new_password_payload.username)
     if not user:
-        raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Incorrect username", headers ={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, 
+                            detail="Incorrect username", 
+                            headers ={"WWW-Authenticate": "Bearer"})
     if verify_password(new_password_payload.new_password, user["hashed_password"]) or not verify_password(new_password_payload.old_password, user["hashed_password"]):
-        raise HTTPException(status_code = status.HTTP_406_NOT_ACCEPTABLE, detail="New password matches old or old password does not match")
+        raise HTTPException(status_code = status.HTTP_406_NOT_ACCEPTABLE, 
+                            detail="New password matches old or old password does not match")
     change_password_m(new_password_payload)
     return {"status": "Success"}
