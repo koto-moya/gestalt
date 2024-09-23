@@ -5,10 +5,10 @@ from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
 from config import get_db_conn
 
-def add_user(username, password):
+def add_user(username, password, brand, email):
     with get_db_conn() as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("INSERT INTO api_users (username, hashed_password) VALUES (%s, %s)", (username, get_password_hash(password),))
+            cursor.execute("INSERT INTO api_users (username, hashed_password, brand, email) VALUES (%s, %s, %s, %s)", (username, get_password_hash(password), brand, email,))
             db_conn.commit()
 
 def get_brand_id(brand_name: str):

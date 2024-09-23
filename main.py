@@ -19,6 +19,8 @@ app.include_router(user_management.router)
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
+app.mount("/styling", StaticFiles(directory="styling"), name="styling")
+
 @app.get("/")
 def landing_page(request: Request):
     return templates.TemplateResponse("landing_page.html", {"request": request})

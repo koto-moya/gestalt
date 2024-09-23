@@ -35,8 +35,7 @@ async def login_for_access_token(request: Request, username: str = Form(...), pa
     response.set_cookie(key="access_token", 
                         value=f"Bearer {access_token}",
                         httponly=True, 
-                        #secure=True, enable in production https 
-                        max_age=TOKEN_EXPIRY) # 50 min token expiry 
+                        max_age=TOKEN_EXPIRY) #secure=True, enable in production https  # 50 min token expiry 
     return response
 
 @router.post("/resetpasswordtoken", include_in_schema=False, response_class=HTMLResponse)

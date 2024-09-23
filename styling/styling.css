@@ -1,0 +1,86 @@
+/* Base Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #2d2b2b;
+    color: #FBECEDFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Heading Styling */
+h1, h2 {
+    font-family: 'Silkscreen', sans-serif;
+    color: #A82223FF;
+}
+
+h1 {
+    font-size: 64px;
+    letter-spacing: 8px;
+    margin-bottom: 50px;
+}
+
+h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+/* Button Styling */
+button, .submit, .login-btn, .upload-data-btn {
+    padding: 15px 40px;
+    background-color: #A82223FF;
+    color: #FBECEDFF;
+    border: none;
+    border-radius: 30px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+button:hover, .submit:hover, .login-btn:hover, .upload-data-btn:hover {
+    background-color: #DD5859FF;
+}
+
+.button-group, .button {
+    background-color: transparent;
+    border: 2px solid #A82223FF;
+    color: #A82223FF;
+}
+
+.button:hover {
+    background-color: #A82223FF;
+    color: #FBECEDFF;
+}
+
+/* Input Styling */
+input[type="text"], input[type="password"], select {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #FBECEDFF;
+    border: 2px solid transparent;
+    border-radius: 30px;
+    font-size: 16px;
+    color: #2d2b2b;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, select:focus {
+    border-color: #A82223FF;
+}
