@@ -5,19 +5,11 @@ from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
 from config import get_db_conn
 
-def get_brand_id(brand_name: str):
+def get_brand_id(brand: str):
     with get_db_conn() as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            # This should be a little smarter to recognize some more variability in the spelling
-            # Now that I think about it, adding a user should be only available internally.
-            # i.e. admin needs to add email and brand which will send reset token to the end user
-            # like a Brand liason.  
-            cursor.execute("SELECT id FROM brands WHERE lower(brand) = lower(%s)", (brand_name,))
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor: 
+            cursor.execute("SELECT id FROM brands WHERE lower(brand) = lower(%s)", (brand.lower(),))
             brand = cursor.fetchone()
-            # if not brand:
-            #     cursor.execute("INSERT INTO brands (brand) VALUES (%s) RETURNING id", (brand_name.lower(),))
-            #     brand = cursor.fetchone()
-            #     db_conn.commit()
             return brand['id']
 
 def get_user(username: str):

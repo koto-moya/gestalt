@@ -26,6 +26,5 @@ class NewPasswordPayload(BaseModel):
     
 # This type is for the actual data being sent
 class DataPayload(BaseModel):
-    brand: constr(min_length=1, max_length=30) # type: ignore
     source: constr(min_length=1, max_length=30) # type: ignore
     data: dict

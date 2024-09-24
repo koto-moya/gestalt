@@ -22,7 +22,7 @@ def home_page(request: Request, current_user: User =  Depends(get_current_user))
 def home_page(request: Request, current_user: User =  Depends(get_current_user)):
     return templates.TemplateResponse("upload_codes_data.html", {"request":request})
 
-@router.post("/data", summary="data upload")
+@router.post("/data", summary="data upload", include_in_schema=False)
 @limiter.limit("100/minute")
 async def data_to_db(request: Request, file: UploadFile = File(...), source: str = Form(...), current_user: User =  Depends(get_current_user)) -> dict:
     content = await file.read()
