@@ -1,0 +1,1 @@
+# B sure to add get_current_user to all endpoints

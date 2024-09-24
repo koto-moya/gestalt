@@ -6,16 +6,16 @@ from psycopg2 import pool
 from contextlib import contextmanager
 import os
 
-db_pool = pool.SimpleConnectionPool(minconn=1, maxconn=10, dbname=os.getenv("DBNAME"), user=os.getenv("PGUSERCREATOR"), password=os.getenv("PGPASSWORDCREATOR"), host=os.getenv("PGHOST"), port=os.getenv("PGPORT"))
+db_pool_user_creator = pool.SimpleConnectionPool(minconn=1, maxconn=10, dbname=os.getenv("DBNAME"), user=os.getenv("PGUSERCREATOR"), password=os.getenv("PGPASSWORDCREATOR"), host=os.getenv("PGHOST"), port=os.getenv("PGPORT"))
 
 
 @contextmanager
 def get_db_conn():
-    conn = db_pool.getconn()
+    conn = db_pool_user_creator.getconn()
     try:
         yield conn
     finally:
-        db_pool.putconn(conn)
+        db_pool_user_creator.putconn(conn)
 
 def add_user(username, password, brand, email):
     with get_db_conn() as db_conn:

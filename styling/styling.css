@@ -15,10 +15,15 @@ body {
     height: 100vh;
 }
 
+/* Container Styling */
 .container {
     text-align: center;
     width: 100%;
     max-width: 400px;
+    background-color: #1e1e1e;
+    border: 4px solid #A82223FF;
+    padding: 20px;
+    box-shadow: 10px 10px 0px #DD5859FF;
 }
 
 /* Heading Styling */
@@ -31,6 +36,7 @@ h1 {
     font-size: 64px;
     letter-spacing: 8px;
     margin-bottom: 50px;
+    text-shadow: 4px 4px #1e1e1e;
 }
 
 h2 {
@@ -40,30 +46,77 @@ h2 {
 
 /* Button Styling */
 button, .submit, .login-btn, .upload-data-btn {
-    padding: 15px 40px;
-    background-color: #A82223FF;
-    color: #FBECEDFF;
+    position: relative;
     border: none;
-    border-radius: 30px;
-    font-size: 20px;
+    background: transparent;
+    padding: 0;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    outline-offset: 4px;
+    transition: filter 250ms;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
     width: 100%;
+    margin: 10px 0;
 }
 
-button:hover, .submit:hover, .login-btn:hover, .upload-data-btn:hover {
-    background-color: #DD5859FF;
+button .button-shadow, .submit .button-shadow, .login-btn .button-shadow, .upload-data-btn .button-shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: hsl(0deg 0% 0% / 0.25);
+    will-change: transform;
+    transform: translateY(2px);
+    transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
 }
 
-.button-group, .button {
-    background-color: transparent;
-    border: 2px solid #A82223FF;
-    color: #A82223FF;
+button .button-edge, .submit .button-edge, .login-btn .button-edge, .upload-data-btn .button-edge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to left,
+        #A82223FF 0%,
+        #DD5859FF 8%, 
+        #DD5859FF 92%,
+        #A82223FF 100%
+    );
 }
 
-.button:hover {
-    background-color: #A82223FF;
+button .button-front, .submit .button-front, .login-btn .button-front, .upload-data-btn .button-front {
+    display: block;
+    position: relative;
+    padding: 15px 40px;
+    font-size: 20px;
     color: #FBECEDFF;
+    background-color: #A82223FF;
+    will-change: transform;
+    transform: translateY(-4px);
+    transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+}
+
+button:hover .button-front, .submit:hover .button-front, .login-btn:hover .button-front, .upload-data-btn:hover .button-front {
+    transform: translateY(-6px);
+    transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
+
+button:active .button-front, .submit:active .button-front, .login-btn:active .button-front, .upload-data-btn:active .button-front {
+    transform: translateY(-2px);
+    transition: transform 34ms;
+}
+
+button:hover .button-shadow, .submit:hover .button-shadow, .login-btn:hover .button-shadow, .upload-data-btn:hover .button-shadow {
+    transform: translateY(4px);
+    transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+}
+
+button:active .button-shadow, .submit:active .button-shadow, .login-btn:active .button-shadow, .upload-data-btn:active .button-shadow {
+    transform: translateY(1px);
+    transition: transform 34ms;
 }
 
 /* Input Styling */
@@ -72,8 +125,7 @@ input[type="text"], input[type="password"], select {
     padding: 15px;
     margin: 10px 0;
     background-color: #FBECEDFF;
-    border: 2px solid transparent;
-    border-radius: 30px;
+    border: 2px solid #A82223FF;
     font-size: 16px;
     color: #2d2b2b;
     text-align: center;
@@ -82,5 +134,5 @@ input[type="text"], input[type="password"], select {
 }
 
 input[type="text"]:focus, input[type="password"]:focus, select:focus {
-    border-color: #A82223FF;
+    border-color: #DD5859FF;
 }

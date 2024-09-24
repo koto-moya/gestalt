@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from fastapi import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -22,5 +21,7 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.mount("/styling", StaticFiles(directory="styling"), name="styling")
 
 @app.get("/")
-def landing_page(request: Request):
-    return templates.TemplateResponse("landing_page.html", {"request": request})
+def landing_page(request: Request, response: Response):
+    response = templates.TemplateResponse("landing_page.html", {"request": request})
+    response.delete_cookie(key="access_token",  path="/")
+    return response
