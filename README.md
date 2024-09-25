@@ -1,19 +1,13 @@
-# PARM 
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styling/styling.css">
+</head>
 <div align="center">
-<img src="assets/logo.png" width="128" height="128">
+<h1>gestalt</h1>
+<img src="assets/gestalt.png" alt="gestalt reification">
 </div>
+</html>
 
-### Podcast Advertising Relationship Management System
 
-A simple (one could hope) FastAPI based CRM for [Podscale](https://podscalemedia.com/).
 
-## Features
-
-- OAuth2
-- Data ingestion endpoints
-- No Javascript
-
-## Future updates
-
-- Internal frontend for data visualization (cause who likes PowerBI 🤮)
-- Ran locally on a raspberry pi (🙅‍♂️☁️)
