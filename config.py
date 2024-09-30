@@ -9,14 +9,15 @@ from contextlib import contextmanager
 limiter = Limiter(key_func=get_remote_address)
 
 db_pool_external_user = pool.SimpleConnectionPool(minconn=1, maxconn=10, dbname=os.getenv("DBNAME"), user=os.getenv("PGUSER"), password=os.getenv("PGPASSWORD"), host=os.getenv("PGHOST"), port=os.getenv("PGPORT"))
+db_pool_scope_check = pool.SimpleConnectionPool(minconn=1, maxconn=10, dbname=os.getenv("DBNAME"), user=os.getenv("PGUSERSCOPE"), password=os.getenv("PGPASSWORDSCOPE"), host=os.getenv("PGHOST"), port=os.getenv("PGPORT"))
 
 @contextmanager
-def get_db_conn():
-    conn = db_pool_external_user.getconn()
+def get_db_conn(pool):
+    conn = pool.getconn()
     try:
         yield conn
     finally:
-        db_pool_external_user.putconn(conn)
+        pool.putconn(conn)
 
 SECRET_KEY = os.getenv("CRYPTKEY") # generate using openssl rand -hex 32
 ALGORITHM = "HS256"
