@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 from modules.utils import get_current_user
 from modules.types import User
-from modules.scope import get_scope
+from modules.db import get_scope
 
 router  = APIRouter(prefix= "/internal")
 templates = Jinja2Templates(directory="internal_templates")

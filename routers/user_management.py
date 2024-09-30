@@ -8,8 +8,7 @@ from fastapi.responses import RedirectResponse
 
 from modules.utils import authenticate_user, create_access_token, get_user, get_current_user, verify_password
 from modules.types import Token, NewPasswordPayload, User
-from modules.db import get_email, store_reset_token, send_token, reset_password_m, remove_reset_token, reset_authentication_verification,change_password_m
-from modules.scope import get_scope
+from modules.db import get_email, store_reset_token, send_token, reset_password_m, remove_reset_token, reset_authentication_verification, change_password_m, get_scope
 from config import limiter, TOKEN_EXPIRY
 
 router  = APIRouter(prefix= "/landing")

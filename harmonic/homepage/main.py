@@ -1,5 +1,6 @@
 from homepage_ui import Ui_mw_home
 from PySide6 import QtWidgets
+from modules.utils import get_current_user
 
 
 class HomeWindow(QtWidgets.QMainWindow, Ui_mw_home):

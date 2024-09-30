@@ -4,7 +4,27 @@ from datetime import datetime, timezone, timedelta
 
 from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
-from config import get_db_conn, db_pool_external_user, db_pool_scope_check
+from config import get_db_conn, db_pool_external_user, db_pool_scope_check, db_pool_user_creator, reporting_db_pool
+
+
+def update_code_use():
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            
+
+
+def add_user(username, password, brand, email):
+    with get_db_conn(db_pool_user_creator) as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("INSERT INTO api_users (username, hashed_password, brand, email) VALUES (%s, %s, %s, %s)", (username, get_password_hash(password), brand.lower(), email,))
+            cursor.execute("INSERT INTO brands (brand) VALUES (%s)", (brand.lower(),))
+            db_conn.commit()
+
+def insert_scope(user_id, scope):
+    with get_db_conn(db_pool_user_creator) as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("INSERT INTO scopes (user_id, scope) VALUES (%s, %s)", (user_id, scope,))
+            db_conn.commit()
 
 def get_scope(user_id):
     with get_db_conn(db_pool_scope_check) as db_conn:
