@@ -6,11 +6,12 @@ from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
 from config import get_db_conn, db_pool_external_user, db_pool_scope_check, db_pool_user_creator, reporting_db_pool
 
-
-def update_code_use():
+def get_brands():
     with get_db_conn(reporting_db_pool) as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            pass
+            cursor.execute("USE reporting_db SELECT brand FROM brands")
+            cursor.fetchall()
+
 def add_user(username, password, brand, email):
     with get_db_conn(db_pool_user_creator) as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
