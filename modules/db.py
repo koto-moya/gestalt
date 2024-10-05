@@ -10,9 +10,7 @@ from config import get_db_conn, db_pool_external_user, db_pool_scope_check, db_p
 def update_code_use():
     with get_db_conn(reporting_db_pool) as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            
-
-
+            pass
 def add_user(username, password, brand, email):
     with get_db_conn(db_pool_user_creator) as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:

@@ -1,7 +1,6 @@
 from fastapi import HTTPException, Depends, status, Request
 from datetime import timedelta
 from fastapi import APIRouter
-from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
 
 from config import limiter, TOKEN_EXPIRY
@@ -10,7 +9,6 @@ from modules.types import User, DataPayload, Token
 from modules.db import insert_data, get_brand_id
 
 router  = APIRouter(prefix= "/api")
-templates = Jinja2Templates(directory="templates")
 # B sure to add get_current_user to all endpoints except for signing in of course
 
 @router.post("/token")
