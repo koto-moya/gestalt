@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from config import limiter
-from routers import items, system_status, user_management, api, internal
+from routers import items, system_status, user_management, api, internal, harmonic
 
 app = FastAPI(docs_url=None, redoc_url="/docs", openapi_url="/api/openapi.json")
 templates = Jinja2Templates(directory="templates")
@@ -17,6 +17,7 @@ app.include_router(system_status.router)
 app.include_router(user_management.router)
 app.include_router(api.router)
 app.include_router(internal.router)
+app.include_router(harmonic.router)
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 

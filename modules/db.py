@@ -9,8 +9,23 @@ from config import get_db_conn, db_pool_external_user, db_pool_scope_check, db_p
 def get_brands():
     with get_db_conn(reporting_db_pool) as db_conn:
         with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("USE reporting_db SELECT brand FROM brands")
-            cursor.fetchall()
+            cursor.execute("SELECT brand FROM brands")
+            data = cursor.fetchall()
+    return data
+
+def get_codes():
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT code FROM codes")
+            data = cursor.fetchall()
+    return data
+
+def get_podcasts():
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT podcastname FROM podcasts")
+            data = cursor.fetchall()
+    return data        
 
 def add_user(username, password, brand, email):
     with get_db_conn(db_pool_user_creator) as db_conn:

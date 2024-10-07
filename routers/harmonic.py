@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from config import limiter, TOKEN_EXPIRY
 from modules.utils import authenticate_user, create_access_token, get_current_user_internal
 from modules.types import User, DataPayload, Token
-from modules.db import insert_data, get_brand_id, get_brands, get_scope
+from modules.db import get_brands, get_scope, get_codes, get_podcasts
 
 router  = APIRouter(prefix= "/harmonic")
 # B sure to add get_current_user to all endpoints except for signing in of course
@@ -33,22 +33,22 @@ async def get_brands_e(request: Request, current_user: User =  Depends(get_curre
 
 @router.get("/getcodes")
 @limiter.limit("10/minute")
-async def get_brands_e(request: Request, current_user: User =  Depends(get_current_user_internal)):
+async def get_codes_e(request: Request, current_user: User =  Depends(get_current_user_internal)):
     scope = get_scope(current_user.id)
     if scope != "internal":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
     else:
-        brands = get_brands()
-        return brands
+        codes = get_codes()
+        return codes
 
 @router.get("/getpodcast")
 @limiter.limit("10/minute")
-async def get_brands_e(request: Request, current_user: User =  Depends(get_current_user_internal)):
+async def get_codes_e(request: Request, current_user: User =  Depends(get_current_user_internal)):
     scope = get_scope(current_user.id)
     if scope != "internal":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
     else:
-        brands = get_brands()
-        return brands
+        podcasts = get_podcasts()
+        return podcasts
         
 
