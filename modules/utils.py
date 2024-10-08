@@ -2,6 +2,7 @@ from fastapi import HTTPException, Depends, status, Request
 import jwt
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timezone, timedelta
+from fuzzywuzzy import process
 
 from .types import TokenData
 from .db import get_user
@@ -64,3 +65,28 @@ async def get_current_user_internal(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     return user
+
+def match_pod_names(x, podcasts: list):
+    if x == "Podcast" or x == "podcast":
+        return "podcast"
+    x = x.replace("The", "")
+    x = x.replace(" ", "")
+    x = x.replace("show", "")
+    x = x.replace("the", "")
+    x = x.replace("Show", "")
+    x = x.replace("Podcast", "")
+    x = x.replace("podcast", "")
+    x = x.replace("youtube", "")
+    x = x.replace("Youtube", "")
+    x = x.replace("newsletter", "")
+    x = x.replace("Newsletter", "")
+    x = x.replace("and", "")
+    x = x.replace("And", "")
+    x = x.replace("&", "")
+    x = x.replace("'", "")
+    best_match = process.extractOne(x, podcasts, score_cutoff=80)
+    # eventually: if none then insert into podcast table and return x
+    if best_match:
+        return best_match[0]
+    else:
+        return best_match
