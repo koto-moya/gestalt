@@ -6,25 +6,35 @@ from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
 from config import get_db_conn, db_pool_external_user, db_pool_scope_check, db_pool_user_creator, reporting_db_pool
 
+
+def get_code_use(startdate, enddate, brand):
+    brand_id = get_brand_id(brand)
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor() as cursor:
+            cursor.execute('SELECT pc.podcastname as "podcast", sum(revenue) as "revenue", sum(orders) as "orders" from code_use as cu inner join brands b ON cu.brandid = b.id inner join codes c ON cu.code = c.code inner join podcasts pc ON c.podcastid = pc.id where cu.date between %s and %s and b.id = %s group by pc.podcastname',
+                           (startdate, enddate, brand_id,))
+            data = cursor.fetchall()
+    return data
+
 def get_brands():
     with get_db_conn(reporting_db_pool) as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        with db_conn.cursor() as cursor:
             cursor.execute("SELECT brand FROM brands")
-            data = cursor.fetchall()
+            data = [row[0] for row in cursor.fetchall()]
     return data
 
 def get_codes():
     with get_db_conn(reporting_db_pool) as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            cursor.execute("SELECT code FROM codes")
-            data = cursor.fetchall()
+        with db_conn.cursor() as cursor:
+            cursor.execute("SELECT code FROM codes where activestatus = TRUE")
+            data = [row[0] for row in cursor.fetchall()]
     return data
 
 def get_podcasts():
     with get_db_conn(reporting_db_pool) as db_conn:
-        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        with db_conn.cursor() as cursor:
             cursor.execute("SELECT podcastname FROM podcasts")
-            data = cursor.fetchall()
+            data = [row[0] for row in cursor.fetchall()]
     return data        
 
 def add_user(username, password, brand, email):
