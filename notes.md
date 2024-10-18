@@ -21,3 +21,8 @@
 - need to change the hba file: host -> hostssl  
 
 - make sure to restart postgres on server startup to listen on the right port. ( add to bashrc file for automation.)
+
+
+podcast test names
+
+podtest, podtest2

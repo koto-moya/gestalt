@@ -52,7 +52,7 @@ def get_codes():
             data = [row[0] for row in cursor.fetchall()]
     return data
 
-def get_podcasts():
+def get_podcasts() -> list:
     with get_db_conn(reporting_db_pool) as db_conn:
         with db_conn.cursor() as cursor:
             cursor.execute("SELECT podcastname FROM podcasts")

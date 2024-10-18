@@ -83,7 +83,7 @@ async def get_performance_e(request: Request, current_user: User =  Depends(get_
         survey_performance_df = survey_performance_df.groupby("podcast", as_index=False).sum()
         podscribe_performance_df = podscribe_performance_df.groupby("podcast", as_index=False).sum()
         
-        # codes are retrieved here to capute any new pod names that may exist even though the chances of the codes data having an
+        # codes are retrieved here to capture any new pod names that may exist even though the chances of the codes data having an
         # unknow pod name is basically 0 given the codes pod names are directly linked to the source of truth
         code_headers, code_performance = get_code_performance(startdate, enddate, brand)
         code_performance_df = pd.DataFrame(code_performance,columns=code_headers)
