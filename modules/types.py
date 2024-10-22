@@ -14,6 +14,26 @@ class User(BaseModel):
     created_at: datetime
     brand: str
 
+class ChatMessage(BaseModel):
+    new_message: str
+
+class NewCode(BaseModel):
+    code: str
+    brand: str
+    podcast: str
+    activestatus: bool
+    startdate: str
+    enddate: str
+
+class SuspendCode(BaseModel):
+    code: str
+    podcast: str
+    brand: str
+    suspenddate: str
+
+class NewPodcast(BaseModel):
+    podcastname: str
+
 class UserInDB(User):
     hashed_password: str
 

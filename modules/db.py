@@ -6,6 +6,50 @@ from .types import UserInDB
 from .auth_helpers import get_password_hash, generate_reset_token, send_email_with_token
 from config import get_db_conn, db_pool_external_user, db_pool_scope_check, db_pool_user_creator, reporting_db_pool
 
+def push_chat_history(userid, new_chat_history: list):
+    # update the chat history with current chat marker selected
+    with get_db_conn(db_pool_user_creator) as db_conn:
+        with db_conn.cursor() as cursor:
+            cursor.execute("update user_chat_history set chathsitory = %s where userid = %s", (json.dumps(new_chat_history), userid,))
+
+def get_chat_history(userid):
+    # retirve the current time 
+    # check if there exists a chat history within the last x hours 
+    # If yes then use that chat history
+    # else insert a new chat history for that user ( new line in the table) and set the current chat marker
+    with get_db_conn(db_pool_user_creator) as db_conn:
+        with db_conn.cursor(cursor_factory = RealDictCursor) as cursor:
+            cursor.execute("select chatdate ,chathistory from user_chat_history where userid = %s", (userid, ))
+            res = cursor.fetchone()
+            if not res:
+                cursor.execute("insert into user_chat_history (userid, chathistory, chatdate, current_chat) values (%s, %s, %s, %s)", (userid, json.dumps([]), datetime.now(), True))
+            else:
+                if res["chatdate"] > (datetime.time() - timedelta(hours=5)) and res["chatdate"] < datetime.now():
+                    return res["chathistory"]
+                else:
+                    cursor.execute("") 
+def suspend_code(code, podcast, brand, suspenddate):
+    brand_id = get_brand_id(brand)
+    podcast_id = get_podcast_id(podcast)
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor() as cursor:
+            cursor.execute("update codes set activestatus = %s, suspenddate = %s where code = %s and podcastid = %s and brandid = %s", (False, suspenddate, code, podcast_id, brand_id,))
+        db_conn.commit()
+
+def new_code(code , brand, podcast, activestatus, startdate, endate):
+    brand_id = get_brand_id(brand)
+    podcast_id = get_podcast_id(podcast)
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor() as cursor:
+            cursor.execute("insert into codes (code, podcastid, activestatus, activestartdate, activeenddate, brandid) values (%s,%s,%s,%s,%s,%s)", (code, podcast_id, activestatus, startdate, endate, brand_id))
+        db_conn.commit()
+
+def new_podcast(podcastname):
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor() as cursor:
+            cursor.execute("insert into podcasts (podcastname) values (%s)", (podcastname,))
+        db_conn.commit()
+
 def get_survey_performance(startdate, enddate, brand):
     brand_id = get_brand_id(brand)
     with get_db_conn(reporting_db_pool) as db_conn:
@@ -85,6 +129,13 @@ def get_brand_id(brand: str):
             cursor.execute("SELECT id FROM brands WHERE lower(brand) = lower(%s)", (brand.lower(),))
             brand = cursor.fetchone()
             return brand['id']
+
+def get_podcast_id(podcast: str):
+    with get_db_conn(reporting_db_pool) as db_conn:
+        with db_conn.cursor(cursor_factory=RealDictCursor) as cursor: 
+            cursor.execute("SELECT id FROM podcasts WHERE lower(podcastname) = lower(%s)", (podcast.lower(),))
+            podcast = cursor.fetchone()
+            return podcast['id']
 
 def get_user(username: str):
     with get_db_conn(db_pool_external_user) as db_conn:

@@ -7,8 +7,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from config import limiter, TOKEN_EXPIRY
 from modules.utils import authenticate_user, create_access_token, get_current_user_internal, match_pod_names
-from modules.types import User, DataPayload, Token
-from modules.db import get_brands, get_scope, get_codes, get_podcasts, get_code_performance, get_survey_performance, get_podscribe_performance
+from modules.types import User, DataPayload, Token, NewPodcast, NewCode, SuspendCode, ChatMessage
+from modules.chat import generate_new_message
+from modules.db import (get_brands, get_scope, get_codes, get_podcasts, 
+                        get_code_performance, get_survey_performance, get_podscribe_performance,
+                        get_chat_history, push_chat_history, 
+                        new_podcast, new_code, suspend_code)
 
 router  = APIRouter(prefix= "/harmonic")
 # B sure to add get_current_user to all endpoints except for signing in of course
@@ -52,7 +56,50 @@ async def get_codes_e(request: Request, current_user: User =  Depends(get_curren
     else:
         podcasts = get_podcasts()
         return podcasts
-        
+
+@router.post("/newpodcasts")
+@limiter.limit("100/minute")
+async def new_podcast_e(request: Request, payload: NewPodcast, current_user: User =  Depends(get_current_user_internal)):
+    scope = get_scope(current_user.id)
+    if scope != "internal":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
+    else:
+        new_podcast(payload.podcastname)
+
+@router.post("/newcodes")
+@limiter.limit("100/minute")
+async def new_code_e(request: Request, payload: NewCode, current_user: User =  Depends(get_current_user_internal)):
+    scope = get_scope(current_user.id)
+    if scope != "internal":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
+    else:
+        new_code(payload.code, payload.brand, payload.podcast, payload.activestatus, payload.startdate, payload.enddate)
+
+@router.post("/suspendcodes")
+@limiter.limit("100/minute")
+async def suspend_code_e(request: Request, payload: SuspendCode, current_user: User =  Depends(get_current_user_internal)):
+    scope = get_scope(current_user.id)
+    if scope != "internal":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
+    else:
+        suspend_code(payload.code, payload.podcast, payload.brand, payload.suspenddate)
+
+@router.post("/chat")
+@limiter.limit("100/minute")
+async def suspend_code_e(request: Request, payload: ChatMessage, current_user: User =  Depends(get_current_user_internal)):
+    scope = get_scope(current_user.id)
+    if scope != "internal":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
+    else:
+        chat_history = get_chat_history(current_user.id)
+        agent_message, chat_state = generate_new_message(chat_history, payload.new_message)
+        push_chat_history(current_user.id, chat_state)
+        # this needs to have a size limit for sure, do I even need to send the whole chat? 
+        # or should I just keep the current chat in harmonic as well?
+        # don't know yet
+        return agent_message
+
+
 @router.get("/getperformance")
 @limiter.limit("100/minute")
 async def get_performance_e(request: Request, current_user: User =  Depends(get_current_user_internal)) -> list:
@@ -92,7 +139,3 @@ async def get_performance_e(request: Request, current_user: User =  Depends(get_
         # I hate this
         out = [out.columns.to_list()] + out.values.tolist()
         return out
-
-        
-
-
