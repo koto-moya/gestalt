@@ -19,15 +19,15 @@ def get_chat_history(userid):
     # else insert a new chat history for that user ( new line in the table) and set the current chat marker
     with get_db_conn(db_pool_user_creator) as db_conn:
         with db_conn.cursor(cursor_factory = RealDictCursor) as cursor:
-            cursor.execute("select chatdate ,chathistory from user_chat_history where userid = %s", (userid, ))
+            cursor.execute("select chatdate ,chathistory from user_chat_history where userid = %s and chatdate between now() and (now() - interval '5 hours')", (userid, ))
             res = cursor.fetchone()
             if not res:
                 cursor.execute("insert into user_chat_history (userid, chathistory, chatdate, current_chat) values (%s, %s, %s, %s)", (userid, json.dumps([]), datetime.now(), True))
+                db_conn.commit()
             else:
-                if res["chatdate"] > (datetime.time() - timedelta(hours=5)) and res["chatdate"] < datetime.now():
-                    return res["chathistory"]
-                else:
-                    cursor.execute("") 
+                return res["chathistory"]
+
+
 def suspend_code(code, podcast, brand, suspenddate):
     brand_id = get_brand_id(brand)
     podcast_id = get_podcast_id(podcast)
