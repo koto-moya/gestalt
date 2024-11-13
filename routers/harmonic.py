@@ -1,14 +1,15 @@
 import pandas as pd
 from fastapi import HTTPException, Depends, status, Request
-from datetime import timedelta
+from datetime import timedelta, datetime
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import StreamingResponse
 
 
 from config import limiter, TOKEN_EXPIRY
 from modules.utils import authenticate_user, create_access_token, get_current_user_internal, match_pod_names
 from modules.types import User, DataPayload, Token, NewPodcast, NewCode, SuspendCode, ChatMessage
-from modules.chat import generate_new_message
+from modules.chat import generate_new_message, generate_new_message_stream
 from modules.db import (get_brands, get_scope, get_codes, get_podcasts, 
                         get_code_performance, get_survey_performance, get_podscribe_performance,
                         get_chat_history, push_chat_history, 
@@ -86,20 +87,57 @@ async def suspend_code_e(request: Request, payload: SuspendCode, current_user: U
 
 @router.post("/chat")
 @limiter.limit("100/minute")
-async def suspend_code_e(request: Request, payload: ChatMessage, current_user: User =  Depends(get_current_user_internal)):
+async def chat_e(request: Request, payload: ChatMessage, current_user: User =  Depends(get_current_user_internal)):
     scope = get_scope(current_user.id)
     if scope != "internal":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
     else:
         chat_history = get_chat_history(current_user.id)
-        agent_message, chat_state = generate_new_message(chat_history, payload.new_message)
-        push_chat_history(current_user.id, chat_state)
+        try:
+            agent_message, chat_state = generate_new_message(chat_history, payload.new_message)
+            push_chat_history(current_user.id, chat_state)
+            return agent_message
+        except:
+            print("still hanging up")
         # this needs to have a size limit for sure, do I even need to send the whole chat? 
         # or should I just keep the current chat in harmonic as well?
-        # don't know yet
-        return agent_message
+        # don't know yetV
 
+@router.post("/chatstream")
+@limiter.limit("100/minute")
+async def chat_stream_e(request: Request, payload: ChatMessage, current_user: User =  Depends(get_current_user_internal)):
+    scope = get_scope(current_user.id)
+    if scope != "internal":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
+    else:
+        chat_history = get_chat_history(current_user.id)
+        # chat_history.append(agent_message)
+        # push_chat_history(current_user.id, chat_history)
+        async def stream_gen():
+            async for chunk in generate_new_message_stream(chat_history, payload.new_message):
+                yield chunk
 
+        return StreamingResponse(stream_gen(), media_type="text/plain")
+        # this needs to have a size limit for sure, do I even need to send the whole chat? 
+        # or should I just keep the current chat in harmonic as well?
+        # don't know yetV
+
+@router.get("/getytdperformance")
+@limiter.limit("100/minute")
+async def get_ytd_performance_e(request: Request, current_user: User = Depends(get_current_user_internal)):
+    scope = get_scope(current_user.id)
+    if scope != "internal":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect Scope")
+    else:
+        query_params = request.query_params
+        startdate = datetime.today() - timedelta(days=365)#query_params.get("startdate")
+        startdate_str = startdate.strftime('%Y-%m-%d')
+        enddate = datetime.today()
+        enddate_str = enddate.strftime('%Y-%m-%d')
+        brand = query_params.get("brand")
+        fields = query_params.get("headers")
+        
+    
 @router.get("/getperformance")
 @limiter.limit("100/minute")
 async def get_performance_e(request: Request, current_user: User =  Depends(get_current_user_internal)) -> list:

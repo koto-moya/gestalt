@@ -1,5 +1,6 @@
 from pydantic import BaseModel, constr
 from datetime import datetime
+from typing import List, Tuple, Optional
 
 class Token(BaseModel):
     access_token: str
@@ -25,6 +26,9 @@ class NewCode(BaseModel):
     startdate: str
     enddate: str
 
+class NewCodeBatch(BaseModel):
+    newcodes: List[Tuple[str, int, bool, Optional[str], Optional[str], Optional[str], int, Optional[str], Optional[int]]]
+
 class SuspendCode(BaseModel):
     code: str
     podcast: str
@@ -33,6 +37,12 @@ class SuspendCode(BaseModel):
 
 class NewPodcast(BaseModel):
     podcastname: str
+
+class NewPodcastBatch(BaseModel):
+    podcastnames: List[Tuple[str]]
+
+class NewBrand(BaseModel):
+    brand: str
 
 class UserInDB(User):
     hashed_password: str
