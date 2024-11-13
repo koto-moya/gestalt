@@ -169,7 +169,7 @@ def new_podcast_batch(podcastnames: List[str]) -> None:
 def new_code_batch(newcodes: List[tuple]) -> None:
     with get_db_conn(reporting_db_pool) as db_conn:
         with db_conn.cursor() as cursor:
-            cursor.executemany("insert into podcasts (podcastname) values (%s)", newcodes)
+            cursor.executemany("insert into codes (code, podcastid, activestatus, activestartdate, activeenddate, suspenddate, brandid, vanityurl, percentoff) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)", newcodes)
         db_conn.commit()
 
 def add_user(username: str, password: str, brand: str, email: str) -> None:
